@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  viewer
+  analyst
+  admin
+}
+
+enum Status {
+  active
+  inactive
+}
+
+enum RecordType {
+  income
+  expense
+}
+
+enum Category {
+  salaries
+  rent
+  software
+  marketing
+  travel
+  utilities
+  insurance
+  client_payments
+  investments
+  refunds
+  consulting
+  subscriptions
+  other
+}
+
+model User {
+  id                     String    @id @default(cuid())
+  name                   String
+  email                  String    @unique
+  passwordHash           String    @map("password_hash")
+  role                   Role      @default(viewer)
+  status                 Status    @default(active)
+  isSuperAdmin           Boolean   @default(false) @map("is_super_admin")
+  requiresPasswordReset  Boolean   @default(true) @map("requires_password_reset")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  sessions               Session[]
+  records                Record[]  @relation("RecordCreator")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Record {
+  id        String   @id @default(cuid())
+  amount    Int
+  type      RecordType
+  category  Category
+  date      DateTime
+  notes     String?
+  createdBy String   @map("created_by")
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  creator   User     @relation("RecordCreator", fields: [createdBy], references: [id])
+
+  @@index([type])
+  @@index([category])
+  @@index([date])
+  @@index([isDeleted])
+}
