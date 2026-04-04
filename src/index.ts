@@ -9,6 +9,7 @@ import { errorHandler } from "./middleware/error-handler.js";
 import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
 import recordRouter from "./routes/record.routes.js";
+import dashboardRouter from "./routes/dashboard.routes.js";
 
 const env = getEnv();
 
@@ -35,6 +36,7 @@ const api = app.basePath("/api");
 api.route("/auth", authRouter);
 api.route("/users", userRouter);
 api.route("/records", recordRouter);
+api.route("/dashboard", dashboardRouter);
 
 console.log(`Starting server on port ${env.PORT}...`);
 

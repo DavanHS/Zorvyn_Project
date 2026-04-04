@@ -19,7 +19,7 @@ export const createUserSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
   email: z.string().email("Invalid email format"),
   role: z.enum(["viewer", "analyst", "admin"], {
-    errorMap: () => ({ message: "Role must be viewer, analyst, or admin" }),
+    message: "Role must be viewer, analyst, or admin",
   }),
 });
 
@@ -53,7 +53,7 @@ const categoryEnum = z.enum([
 export const createRecordSchema = z.object({
   amount: z.number().positive("Amount must be a positive number"),
   type: z.enum(["income", "expense"], {
-    errorMap: () => ({ message: "Type must be income or expense" }),
+    message: "Type must be income or expense",
   }),
   category: categoryEnum,
   date: z.string().refine((val) => {
@@ -81,8 +81,8 @@ export const updateRecordSchema = z.object({
 export const recordIdSchema = z.string().min(1, "Record ID is required");
 
 export const listRecordsQuerySchema = z.object({
-  page: z.string().regex(/^\d+$/).transform(Number).default("1"),
-  limit: z.string().regex(/^\d+$/).transform(Number).default("10"),
+  page: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().min(1)).default("1"),
+  limit: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().min(1).max(100)).default("10"),
   type: z.enum(["income", "expense"]).optional(),
   category: categoryEnum.optional(),
   from: z.string().optional(),

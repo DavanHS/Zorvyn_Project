@@ -2,12 +2,12 @@ import { prisma } from "../utils/db.js";
 import type { RecordType, Category } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 
-function rupeesToCents(rupees: number): number {
+function rupeesTopaise(rupees: number): number {
   return Math.round(rupees * 100);
 }
 
-function centsToRupees(cents: number): number {
-  return cents / 100;
+function paiseToRupees(paise: number): number {
+  return paise / 100;
 }
 
 export interface CreateRecordInput {
@@ -32,7 +32,7 @@ export async function createRecord(input: CreateRecordInput) {
 
   const record = await prisma.record.create({
     data: {
-      amount: rupeesToCents(input.amount),
+      amount: rupeesTopaise(input.amount),
       type: input.type,
       category: input.category,
       date: date,
@@ -53,7 +53,7 @@ export async function createRecord(input: CreateRecordInput) {
 
   return {
     ...record,
-    amount: centsToRupees(record.amount),
+    amount: paiseToRupees(record.amount),
   };
 }
 
@@ -68,7 +68,7 @@ export async function getRecordById(id: string) {
 
   return {
     ...record,
-    amount: centsToRupees(record.amount),
+    amount: paiseToRupees(record.amount),
   };
 }
 
@@ -90,7 +90,7 @@ export async function updateRecord(id: string, input: UpdateRecordInput) {
   } = {};
 
   if (input.amount !== undefined) {
-    updateData.amount = rupeesToCents(input.amount);
+    updateData.amount = rupeesTopaise(input.amount);
   }
   if (input.type !== undefined) {
     updateData.type = input.type;
@@ -123,7 +123,7 @@ export async function updateRecord(id: string, input: UpdateRecordInput) {
 
   return {
     ...record,
-    amount: centsToRupees(record.amount),
+    amount: paiseToRupees(record.amount),
   };
 }
 
@@ -220,7 +220,7 @@ export async function getRecords(input: ListRecordsInput): Promise<ListRecordsOu
   return {
     records: records.map((r) => ({
       ...r,
-      amount: centsToRupees(r.amount),
+      amount: paiseToRupees(r.amount),
     })),
     pagination: {
       page,
