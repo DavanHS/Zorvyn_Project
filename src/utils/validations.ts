@@ -33,3 +33,64 @@ export const updateUserSchema = z.object({
 export const transferSuperAdminSchema = z.object({
   targetUserId: z.string().min(1, "Target user ID is required"),
 });
+
+const categoryEnum = z.enum([
+  "salaries",
+  "rent",
+  "software",
+  "marketing",
+  "travel",
+  "utilities",
+  "insurance",
+  "client_payments",
+  "investments",
+  "refunds",
+  "consulting",
+  "subscriptions",
+  "other",
+]);
+
+export const createRecordSchema = z.object({
+  amount: z.number().positive("Amount must be a positive number"),
+  type: z.enum(["income", "expense"], {
+    errorMap: () => ({ message: "Type must be income or expense" }),
+  }),
+  category: categoryEnum,
+  date: z.string().refine((val) => {
+    const date = new Date(val);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    return date <= today;
+  }, { message: "Date cannot be in the future" }),
+  notes: z.string().max(500, "Notes must be less than 500 characters").optional(),
+});
+
+export const updateRecordSchema = z.object({
+  amount: z.number().positive("Amount must be a positive number").optional(),
+  type: z.enum(["income", "expense"]).optional(),
+  category: categoryEnum.optional(),
+  date: z.string().refine((val) => {
+    const date = new Date(val);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    return date <= today;
+  }, { message: "Date cannot be in the future" }).optional(),
+  notes: z.string().max(500, "Notes must be less than 500 characters").optional(),
+});
+
+export const recordIdSchema = z.string().min(1, "Record ID is required");
+
+export const listRecordsQuerySchema = z.object({
+  page: z.string().regex(/^\d+$/).transform(Number).default("1"),
+  limit: z.string().regex(/^\d+$/).transform(Number).default("10"),
+  type: z.enum(["income", "expense"]).optional(),
+  category: categoryEnum.optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  search: z.string().optional(),
+}).refine(data => {
+  if (data.from && data.to) {
+    return new Date(data.from) <= new Date(data.to);
+  }
+  return true;
+}, { message: "From date must be before To date" });
